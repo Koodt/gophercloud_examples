@@ -27,6 +27,9 @@ go.work.sum
 # env file
 .env
 
+# OpenStack config file with sensitive data
+config.yaml
+
 # Editor/IDE
 # .idea/
 # .vscode/
