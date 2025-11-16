@@ -3,35 +3,25 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
-	"gopkg.in/yaml.v3"
-)
 
-// Config represents OpenStack authentication configuration
-type Config struct {
-	AuthURL     string `yaml:"auth_url"`
-	Username    string `yaml:"username"`
-	Password    string `yaml:"password"`
-	ProjectName string `yaml:"project_name"`
-	DomainName  string `yaml:"domain_name"`
-	Region      string `yaml:"region"`
-}
+	"github.com/koodt/gophercloud_examples/internal/auth"
+)
 
 func main() {
 	// Load configuration from file
-	config, err := loadConfig("config.yaml")
+	config, err := auth.LoadConfig("config.yaml")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
 	// Authenticate with OpenStack
-	provider, err := authenticate(config)
+	provider, err := auth.Authenticate(config)
 	if err != nil {
 		log.Fatalf("Failed to authenticate: %v", err)
 	}
@@ -78,41 +68,4 @@ func main() {
 		fmt.Println("JSON output:")
 		fmt.Println(string(jsonOutput))
 	}
-}
-
-func loadConfig(filename string) (*Config, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open config file: %w", err)
-	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
-	}
-
-	var config Config
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %w", err)
-	}
-
-	return &config, nil
-}
-
-func authenticate(config *Config) (*gophercloud.ProviderClient, error) {
-	opts := gophercloud.AuthOptions{
-		IdentityEndpoint: config.AuthURL,
-		Username:         config.Username,
-		Password:         config.Password,
-		TenantName:       config.ProjectName,
-		DomainName:       config.DomainName,
-	}
-
-	provider, err := openstack.AuthenticatedClient(opts)
-	if err != nil {
-		return nil, fmt.Errorf("authentication failed: %w", err)
-	}
-
-	return provider, nil
 }

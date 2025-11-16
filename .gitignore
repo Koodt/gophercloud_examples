@@ -30,6 +30,9 @@ go.work.sum
 # OpenStack config file with sensitive data
 config.yaml
 
+# Binaries directory
+bin/
+
 # Editor/IDE
 # .idea/
 # .vscode/
